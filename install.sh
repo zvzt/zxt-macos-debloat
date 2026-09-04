@@ -16,8 +16,8 @@ chmod +x "$INSTALL/zxt"
 "$INSTALL/zxt" apply
 
 echo
-printf "Enable automatic debloat after every login/startup? [y/N]: "
-read -r ANSWER </dev/tty
+printf "Enable automatic debloat after every login/startup? [y/N]: " >/dev/tty
+IFS= read -r ANSWER < /dev/tty
 
 case "$ANSWER" in
     y|Y|yes|YES|Yes)
