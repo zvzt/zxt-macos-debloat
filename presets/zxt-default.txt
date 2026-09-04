@@ -1,0 +1,343 @@
+# === Siri / voice assistant ===
+com.apple.assistantd                          # Siri core
+com.apple.Siri.agent                          # Siri agent
+com.apple.SiriTTSTrainingAgent                # Siri voice training
+com.apple.sirittsd                            # Siri TTS daemon
+com.apple.siriinferenced                      # on-device Siri inference
+com.apple.siriknowledged                      # Siri knowledge graph
+com.apple.assistant_cdmd                      # Siri continuous dialog manager
+com.apple.parsecd                             # Siri/Spotlight suggestions backend
+com.apple.parsec-fbf                          # Siri Suggestions feedback
+com.apple.intelligencecontextd                # Apple Intelligence context runtime
+com.apple.intelligenceplatformd               # Apple Intelligence platform
+com.apple.knowledge-agent                     # knowledge graph extraction
+
+# === Apple Intelligence (Tahoe) ===
+com.apple.mlruntimed                          # ML runtime
+com.apple.generativeexperiencesd              # Writing Tools / generative AI
+com.apple.privatecloudcomputed                # Private Cloud Compute (AI cloud offload)
+com.apple.modelcatalogd                       # AI model catalog daemon
+com.apple.ModelCatalogAgent                   # AI model catalog agent
+com.apple.modelmanagerd                       # AI model manager / downloads
+com.apple.naturallanguaged                    # NaturalLanguage framework daemon
+com.apple.textunderstandingd                  # text understanding AI
+com.apple.triald                              # Siri experiments (known CPU hog)
+com.apple.contextstored                       # context store (KNOWN >30GB MEMORY LEAK in Tahoe)
+
+# === Telemetry / analytics ===
+com.apple.analyticsd                          # Apple diagnostics submission
+com.apple.tipsd                               # Tips app notifications
+
+# === AirDrop / Continuity (no iPhone) ===
+
+# === Diagnostics / crash reports ===
+com.apple.ReportCrash                         # auto crash report generator
+com.apple.spindump                            # hang detection / spin reports
+
+# === Apple ads ===
+com.apple.ap.adprivacyd                       # ad privacy
+com.apple.ap.promotedcontentd                 # promoted apps
+
+# === Proactive / predictive ===
+com.apple.coreduetd                           # activity tracker for proactive features
+com.apple.duetexpertd                         # prediction engine
+com.apple.suggestd                            # Spotlight smart suggestions backend
+com.apple.biomesyncd                          # biome event sync
+com.apple.navd                                # time-to-leave / commute predictions
+com.apple.ospredictiond                       # OS behavior predictions
+
+# === Game Center / AirPlay receiver ===
+com.apple.gamed                               # Game Center
+com.apple.AirPlayXPCHelper                    # AirPlay helper
+
+# === Photos analysis ===
+com.apple.photoanalysisd                      # face/scene/object scan in Photos
+com.apple.mediaanalysisd                      # media library indexing
+
+# === News / Stocks / Weather ===
+com.apple.weatherd                            # weather data daemon (menu bar / widgets)
+com.apple.newsd                               # News app daemon
+
+# === Apple ID nags / Family ===
+com.apple.familycircled                       # Family Sharing
+com.apple.followupd                           # Apple ID setup nags
+
+# === Misc ===
+com.apple.helpd                               # Help viewer indexer
+
+# === iMessage / FaceTime / phone relay (no iPhone) ===
+com.apple.imagent                             # iMessage agent
+com.apple.telephonyutilities.callservicesd    # phone call relay from iPhone
+com.apple.imautomatichistorydeletionagent     # iMessage history cleanup
+com.apple.imcore.imtransferagent              # iMessage attachments
+com.apple.callhistoryd                        # iPhone call history sync
+com.apple.CallHistoryPluginHelper             # call history plugin
+com.apple.CallHistorySyncHelper               # call history iCloud sync
+com.apple.businessservicesd                   # Apple Business Chat
+
+# === HomeKit ===
+com.apple.homed                               # HomeKit daemon
+com.apple.homeeventsd                         # HomeKit events
+com.apple.threadradiod                        # Thread radio (Matter/HomeKit)
+com.apple.ThreadCommissionerService           # Matter device commissioning
+
+# === Apple Mail/Calendar/Contacts/Reminders (use Gmail/web instead) ===
+com.apple.contactsd                           # Contacts sync
+com.apple.calaccessd                          # Calendar backend
+com.apple.remindd                             # Reminders
+
+# === Speech / dictation ===
+com.apple.speech.speechsynthesisd.arm64       # text-to-speech
+com.apple.speech.speechdatainstallerd         # voice data installer
+
+# === Wallpaper / thumbnails ===
+com.apple.quicklook.ThumbnailsAgent           # QuickLook thumbnails in Finder
+
+# === App Store + update nags (keeps softwareupdated for security) ===
+com.apple.SoftwareUpdateNotificationManager   # update nag popups
+
+# === Misc dead weight ===
+com.apple.studentd                            # Schoolwork app
+com.apple.liveactivitiesd                     # Live Activities widgets
+
+# === iCloud (no iCloud use) ===
+com.apple.cloudphotod                         # iCloud Photos sync
+
+# === Location/prediction extras (Find My still intact) ===
+com.apple.routined                            # significant locations / location-aware reminders
+com.apple.homeenergyd                         # Home Energy widget
+
+# === Time Machine ===
+com.apple.backupd                             # Time Machine core backup daemon
+com.apple.TMHelperAgent                       # Time Machine menu / reminders
+com.apple.backupd-helper                      # Time Machine scheduling helper
+
+# === Focus / DND / Screen Time ===
+com.apple.ScreenTimeAgent                     # Screen Time
+com.apple.UsageTrackingAgent                  # device usage tracking (Screen Time data)
+
+# === Apple Media Services / iPhone telephony / contacts ===
+com.apple.contacts.postersyncd                # Contacts profile picture sync
+
+# === More AI/ML stragglers ===
+com.apple.mlhostd                             # ML host daemon
+
+# === Cosmetic / app daemons ===
+com.apple.powerchime                          # laptop charging chime sound
+com.apple.shazamd                             # Shazam music recognition (Control Center)
+
+# === Safari (no Safari use) ===
+com.apple.Safari.SafeBrowsing.Service         # Safari Safe Browsing list updates
+com.apple.SafariBookmarksSyncAgent            # Safari bookmarks iCloud sync
+com.apple.SafariLaunchAgent                   # Safari startup agent
+
+# === More AI / Apple Intelligence ===
+com.apple.siriactionsd                        # Siri Shortcuts/Voice Shortcuts agent
+com.apple.ContextStoreAgent                   # CoreDuet ContextStoreAgent
+com.apple.corespeechd                         # Core Speech backbone (Siri/dictation)
+com.apple.corespeechd_system                  # Core Speech system variant
+com.apple.speech.synthesisserver              # speech synthesis server
+com.apple.spotlightknowledged                 # CoreSpotlight semantic search
+com.apple.spotlightknowledged.importer        # CoreSpotlight importer
+com.apple.spotlightknowledged.updater         # CoreSpotlight updater
+com.apple.callintelligenced                   # AI call analysis (call summaries)
+com.apple.intelligenceflowd                   # AI flow daemon
+com.apple.intelligencetasksd                  # AI tasks daemon
+
+# === Apple Music / iTunes / Media streaming ===
+
+# === Apple ID / Apple Pay / SSO ===
+com.apple.passd                               # Wallet / Apple Pay
+com.apple.financed                            # Wallet / Apple Card finance data
+
+# === App Store full kill (re-enable when needed) ===
+
+# === iCloud user-facing notifications ===
+com.apple.iCloudNotificationAgent             # iCloud notification UI
+com.apple.iCloudUserNotificationsd            # iCloud user notifications
+com.apple.icloudmailagent                     # iCloud Mail (no Apple Mail)
+com.apple.FollowUpUI                          # Apple ID nag UI
+
+# === Apple Books (no Books use) ===
+com.apple.bookassetd                          # Apple Books asset downloads
+com.apple.bookdatastored                      # Apple Books data store
+
+# === Telemetry extras ===
+com.apple.geoanalyticsd                       # Geo telemetry
+com.apple.SubmitDiagInfo                      # diagnostic submitter to Apple
+com.apple.BiomeAgent                          # biome event hub agent
+com.apple.biomed                              # biome event hub daemon
+
+# === Contacts/Photos extras ===
+com.apple.contacts.donation-agent             # Contacts → Siri Suggestions feed
+com.apple.photolibraryd                       # Photos library daemon
+
+# === Filesystem / cosmetic ===
+
+# === Contacts / AddressBook (no Mac Contacts use) ===
+com.apple.AddressBook.AssistantService        # Contacts assistant
+com.apple.AddressBook.SourceSync              # Contacts source sync
+com.apple.AddressBook.abd                     # Contacts daemon
+
+# === Maps (Google Maps user) ===
+com.apple.Maps.mapssyncd                      # Apple Maps sync
+com.apple.Maps.mapspushd                      # Apple Maps push
+com.apple.maps.destinationd                   # Apple Maps destinations
+com.apple.intelligentroutingd                 # intelligent routing (Maps)
+
+# === Beta program enrollment (not on macOS beta) ===
+com.apple.appleseed.fbahelperd                # AppleSeed feedback assistant helper
+com.apple.appleseed.seedusaged                # AppleSeed usage telemetry
+com.apple.appleseed.seedusaged.postinstall    # AppleSeed postinstall
+com.apple.betaenrollmentagent                 # beta enrollment agent
+com.apple.betaenrollmentd                     # beta enrollment daemon
+com.apple.feedbackd                           # Feedback Assistant daemon
+
+# === Game controllers (no gamepad attached) ===
+com.apple.GameController.gamecontrolleragentd # game controller agent
+com.apple.GameController.gamecontrollerd      # game controller daemon
+com.apple.GamePolicyAgent                     # game policy agent
+com.apple.gamepolicyd                         # game policy daemon
+com.apple.gamesaved                           # game saves
+
+# === Sidecar / iPad second display (no iPad) ===
+com.apple.sidecar-display-agent               # Sidecar display agent
+com.apple.sidecar-relay                       # Sidecar relay
+
+# === Continuity Capture (no iPhone webcam) ===
+com.apple.cmio.ContinuityCaptureAgent         # iPhone as webcam agent
+com.apple.companiond                          # Apple Watch / iPhone companion
+
+# === Avatar / Memoji / Stickers (no iMessage) ===
+com.apple.avatarsd                            # Memoji / avatars
+com.apple.stickersd                           # iMessage stickers
+
+# === Safari extras (no Safari + no iCloud Keychain) ===
+com.apple.Safari.History                      # Safari history
+com.apple.Safari.PasswordBreachAgent          # password leak checker (needs iCloud Keychain)
+com.apple.SafariHistoryServiceAgent           # Safari history XPC
+com.apple.SafariNotificationAgent             # Safari web notifications
+
+# === Family / Parental controls (no family setup) ===
+com.apple.familycontrols                      # family controls daemon
+com.apple.familycontrols.useragent            # family controls user agent
+com.apple.FamilyControlsAgent                 # family controls agent
+com.apple.familynotificationd                 # family notifications
+com.apple.parentalcontrols.check              # parental controls checker
+com.apple.askpermissiond                      # family purchase approval (Ask to Buy)
+com.apple.assessmentagent                     # education assessment mode
+com.apple.progressd                           # ClassKit education progress
+
+# === Proactive / Siri-adjacent (no Siri) ===
+com.apple.proactived                          # proactive engine
+com.apple.proactiveeventtrackerd              # proactive event tracker
+com.apple.knowledgeconstructiond              # knowledge graph construction
+com.apple.reversetemplated                    # reverse template AI
+
+# === AirPlay sender UI ===
+com.apple.AirPlayUIAgent                      # AirPlay sender UI (sending to Apple TV)
+
+# === Sports / News extras ===
+com.apple.sportsd                             # Apple Sports data
+
+# === Apple FairPlay DRM (no DRM-protected Apple content) ===
+
+# === Diagnostics extras (all telemetry to Apple) ===
+com.apple.diagnosticd                         # diagnostics
+com.apple.diagnosticextensionsd               # diagnostic extensions
+com.apple.diagnostics_agent                   # diagnostics agent
+com.apple.diagnosticservicesd                 # diagnostic services
+com.apple.diagnosticspushd                    # diagnostic push
+com.apple.metrickitd                          # MetricKit (app metrics to Apple)
+com.apple.osanalytics.osanalyticshelper       # OS analytics helper
+com.apple.spindump_agent                      # spindump agent (process hangs)
+com.apple.metadata.mds.spindump               # Spotlight spindump diagnostic
+com.apple.audioanalyticsd                     # audio analytics
+com.apple.inputanalyticsd                     # input analytics (typing/touch)
+com.apple.ecosystemanalyticsd                 # ecosystem analytics
+com.apple.perfpowermetricd                    # perf/power metrics
+com.apple.analyticsagent                      # analytics agent
+com.apple.CrashReporterSupportHelper          # crash reporter support
+com.apple.DiagnosticsReporter                 # diagnostics reporter
+com.apple.InstallerDiagnostics.installerdiagd # installer diagnostics
+com.apple.InstallerDiagnostics.installerdiagwatcher # installer diag watcher
+com.apple.loginwindow.LWWeeklyMessageTracer   # weekly login telemetry
+com.apple.symptomsd-diag                      # symptoms diag (keep core symptomsd)
+com.apple.rtcreportingd                       # FaceTime/WebRTC call quality reports
+com.apple.usbctelemetryd                      # USB-C port telemetry
+com.apple.systemstats.analysis                # system stats analysis
+com.apple.systemstats.daily                   # daily system stats
+com.apple.systemstats.microstackshot_periodic # periodic microstackshots
+com.apple.powerlogHelperd                     # battery usage logging (Settings battery graph)
+com.apple.signpost.signpost_reporter          # signpost perf telemetry
+com.apple.enhancedloggingd                    # MDM enhanced logging
+
+# === Misc Apple legacy / unused ===
+com.apple.nfcd                                # NFC daemon (no Apple Pay)
+com.apple.facetimemessagestored               # FaceTime message store
+com.apple.calendar.CalendarAgentBookmarkMigrationService # one-shot Cal bookmark migration
+
+# === Apple ID auth (kill — re-enable when needed for App Store) ===
+
+# === Apple Translate / Notes / VoiceOver / accessibility extras ===
+com.apple.translationd                        # Apple Translate API (Translate app, Safari translate)
+com.apple.notes.exchangenotesd                # Apple Notes Exchange sync
+com.apple.VoiceOver                           # screen reader (no accessibility use)
+com.apple.accessibility.LiveTranscriptionAgent # live transcription/captions
+com.apple.accessibility.axassetsd             # TTS voice + VoiceOver/Magnifier model asset downloads
+com.apple.DictationIM                         # dictation input method
+com.apple.voicebankingd                       # custom voice creation (Live Speech)
+com.apple.voicememod                          # Voice Memos app
+
+# === iCloud settings / language assets ===
+com.apple.cloudsettingssyncagent              # iCloud settings sync
+com.apple.languageassetd                      # Apple language model assets (Siri/dictation/translate)
+com.apple.erasecontentsettingshelperd         # Erase All Content (only used for factory reset)
+
+# === Apple TV watchlist / social / WiFi telemetry ===
+com.apple.watchlistd                          # Apple TV+ watchlist
+com.apple.sociallayerd                        # Game Center social layer
+com.apple.wifianalyticsd                      # WiFi telemetry
+
+# === T2 / bridgeOS (Apple Silicon doesn't use bridgeOS) ===
+
+# === Print (no printer) ===
+com.apple.printtool.agent                     # print tool agent
+com.apple.printtool.daemon                    # print tool daemon
+com.apple.printuitool.agent                   # print UI tool agent
+
+# === Xcode / iOS dev stack (FE/BE dev, no mobile) ===
+com.apple.dt.AutomationModeUI                 # Xcode automation UI
+com.apple.dt.automationmode-writer            # Xcode automation writer
+
+# === Apple Music Player (AMP) suite — no Apple Music ===
+
+# === Apple TV+ / video subscriptions ===
+com.apple.videosubscriptionsd                 # Apple TV+ subscriptions
+
+# === Touch Bar (M4 has none) ===
+com.apple.nowplayingtouchui                   # Touch Bar now-playing UI
+com.apple.touchbarserver                      # Touch Bar server
+com.apple.controlstrip                        # Touch Bar control strip
+com.apple.SpacesTouchBarAgent.app             # Touch Bar Spaces agent
+com.apple.accessibility.dfrhud                # Touch Bar accessibility HUD
+
+# === Continuity Data Protocol (no iPhone) ===
+com.apple.cdpd                                # Continuity Data Protocol
+
+# === Safari Web Inspector / WebKit push (no Safari) ===
+
+# === Photos People / face recognition ===
+com.apple.peopled                             # People framework (face detection in Photos)
+
+# === iCloud Drive / Keychain Circle / SyncedDefaults / CloudDocs ===
+
+# === MDM / Managed apps (no MDM enrollment) ===
+com.apple.managedappdistributionagent         # managed app distribution agent
+com.apple.managedappdistributiond             # managed app distribution daemon
+
+# === Migration / setup leftover ===
+com.apple.milod                               # Migration assistant daemon
+
+# === extra Time Machine replicator label ===
+com.apple.replicatord                         # Time Machine replicator (alt label)
