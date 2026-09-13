@@ -4,32 +4,46 @@
 # Aggressive daily-use preset.
 #
 # Goal:
-# Remove genuinely optional background services without
-# disabling important macOS frameworks, graphics/UI services,
-# scheduling infrastructure, Spotlight internals or system
-# performance infrastructure.
+# Disable optional workload producers without disabling the
+# core macOS schedulers and infrastructure those workloads run
+# through.
 #
-# IMPORTANT:
-# This preset intentionally DOES NOT disable:
+# ============================================================
+
+
+# ============================================================
+# NEVER TARGET IN THIS PRESET
 #
+# dasd
+# duetexpertd
+# coreduetd
+# runningboardd
 # WindowServer
+# WindowManager
+# tccd
+# cfprefsd
+# launchd
+# mobileassetd
+# mds
+# mdworker
 # corespotlightd
 # spotlightknowledged
-# mds / mdworker
 # contextstored
-# coreduetd
-# duetexpertd
-# BiomeAgent / biomed / biomesyncd
-# GamePolicyAgent / gamepolicyd
-# QuickLook ThumbnailsAgent
-# diagnosticd
-# spindump
-# perfpowermetricd
-# powerlogHelperd
-# mlhostd
-# generic NaturalLanguage/ML runtimes
-# Safari runtime/security services
+# BiomeAgent
+# biomed
+# biomesyncd
+# GamePolicyAgent
+# gamepolicyd
+# QuickLook thumbnail infrastructure
+# PerfPowerServices
+# powerd
+# logd
+# securityd
+# coreauthd
 #
+# These are infrastructure/scheduling processes.
+# Disabling or starving them can create delayed work,
+# UI stalls, repeated retries and large CPU bursts.
 # ============================================================
 
 
@@ -49,9 +63,9 @@ com.apple.parsec-fbf
 
 
 # ============================================================
-# Apple Intelligence — feature-specific services only
+# Apple Intelligence feature services
 #
-# Generic macOS ML frameworks are deliberately left alone.
+# Generic ML infrastructure is intentionally retained.
 # ============================================================
 
 com.apple.generativeexperiencesd
@@ -65,7 +79,7 @@ com.apple.callintelligenced
 
 
 # ============================================================
-# Proactive suggestions
+# Proactive suggestions / prediction
 # ============================================================
 
 com.apple.suggestd
@@ -82,9 +96,9 @@ com.apple.triald
 
 
 # ============================================================
-# Apple analytics / telemetry
+# Analytics / telemetry
 #
-# Core diagnostics and hang/crash infrastructure are retained.
+# Core crash / hang infrastructure is retained.
 # ============================================================
 
 com.apple.analyticsd
@@ -106,7 +120,7 @@ com.apple.loginwindow.LWWeeklyMessageTracer
 
 
 # ============================================================
-# Apple promotional content
+# Advertising / promotional content
 # ============================================================
 
 com.apple.tipsd
@@ -114,7 +128,7 @@ com.apple.ap.promotedcontentd
 
 
 # ============================================================
-# News / Stocks / Sports / optional information services
+# News / Stocks / Sports
 # ============================================================
 
 com.apple.newsd
@@ -122,10 +136,9 @@ com.apple.sportsd
 
 
 # ============================================================
-# Photos background analysis
+# Photos background intelligence
 #
-# Photos itself remains functional.
-# We do NOT disable photolibraryd.
+# The Photos library daemon itself is retained.
 # ============================================================
 
 com.apple.photoanalysisd
@@ -135,6 +148,8 @@ com.apple.peopled
 
 # ============================================================
 # HomeKit / Matter
+#
+# Remove this section if you use HomeKit from this Mac.
 # ============================================================
 
 com.apple.homed
@@ -153,7 +168,7 @@ com.apple.UsageTrackingAgent
 
 
 # ============================================================
-# Family / parental-control services
+# Family / parental control
 # ============================================================
 
 com.apple.familycircled
@@ -166,7 +181,7 @@ com.apple.askpermissiond
 
 
 # ============================================================
-# Education / classroom services
+# Education / classroom
 # ============================================================
 
 com.apple.studentd
@@ -184,6 +199,8 @@ com.apple.bookdatastored
 
 # ============================================================
 # Apple Maps background extras
+#
+# Core location infrastructure is retained.
 # ============================================================
 
 com.apple.Maps.mapssyncd
@@ -204,14 +221,23 @@ com.apple.feedbackd
 
 
 # ============================================================
-# Game Center / game controllers
+# Game Center
 #
-# GamePolicy is intentionally retained.
+# GamePolicy is intentionally retained because applications
+# and games can rely on it.
 # ============================================================
 
 com.apple.gamed
 com.apple.gamesaved
 com.apple.sociallayerd
+
+
+# ============================================================
+# Game controller discovery
+#
+# Remove these if you use console-style controllers.
+# ============================================================
+
 com.apple.GameController.gamecontrolleragentd
 com.apple.GameController.gamecontrollerd
 
@@ -247,7 +273,7 @@ com.apple.liveactivitiesd
 
 
 # ============================================================
-# Voice Memos / personal voice extras
+# Voice Memos / custom personal voice
 # ============================================================
 
 com.apple.voicememod
@@ -257,21 +283,10 @@ com.apple.voicebankingd
 # ============================================================
 # Dictation
 #
-# Core speech synthesis is NOT disabled because third-party
-# applications can use it independently from Siri.
+# Generic speech infrastructure remains enabled.
 # ============================================================
 
 com.apple.DictationIM
-
-
-# ============================================================
-# Accessibility extras
-#
-# Remove these entries if you use these accessibility features.
-# ============================================================
-
-com.apple.VoiceOver
-com.apple.accessibility.LiveTranscriptionAgent
 
 
 # ============================================================
@@ -282,7 +297,7 @@ com.apple.translationd
 
 
 # ============================================================
-# Apple TV
+# Apple TV background extras
 # ============================================================
 
 com.apple.watchlistd
@@ -290,60 +305,25 @@ com.apple.videosubscriptionsd
 
 
 # ============================================================
-# School / Exchange Notes extras
+# Exchange Notes helper
 # ============================================================
 
 com.apple.notes.exchangenotesd
 
 
 # ============================================================
-# Time Machine
+# Contacts Siri donation
 #
-# Keep disabled only if you do NOT use Time Machine.
-# ============================================================
-
-com.apple.backupd
-com.apple.TMHelperAgent
-com.apple.backupd-helper
-com.apple.replicatord
-
-
-# ============================================================
-# iCloud Photos
-#
-# This does NOT disable general iCloud.
-# ============================================================
-
-com.apple.cloudphotod
-
-
-# ============================================================
-# Contacts Siri-donation feed
-#
-# Contacts itself remains functional.
+# contactsd itself remains enabled.
 # ============================================================
 
 com.apple.contacts.donation-agent
 
 
 # ============================================================
-# iPhone telephony relay extras
+# Location prediction
 #
-# Messages itself remains enabled.
-# Continuity framework itself remains enabled.
-# ============================================================
-
-com.apple.telephonyutilities.callservicesd
-com.apple.callhistoryd
-com.apple.CallHistoryPluginHelper
-com.apple.CallHistorySyncHelper
-com.apple.businessservicesd
-
-
-# ============================================================
-# Location prediction extras
-#
-# Core Location and Find My remain intact.
+# CoreLocation and Find My remain enabled.
 # ============================================================
 
 com.apple.navd
@@ -360,7 +340,7 @@ com.apple.powerchime
 # ============================================================
 # Printer UI
 #
-# Remove these entries if you regularly print from this Mac.
+# Remove these entries if you print from this Mac.
 # ============================================================
 
 com.apple.printtool.agent
@@ -371,7 +351,7 @@ com.apple.printuitool.agent
 # ============================================================
 # Touch Bar
 #
-# Safe to disable on Macs with no Touch Bar.
+# Appropriate for an M1 MacBook Air with no Touch Bar.
 # ============================================================
 
 com.apple.nowplayingtouchui
@@ -384,7 +364,7 @@ com.apple.accessibility.dfrhud
 # ============================================================
 # MDM / managed applications
 #
-# Intended for an unmanaged personal Mac.
+# Intended for a personally managed Mac.
 # ============================================================
 
 com.apple.managedappdistributionagent
