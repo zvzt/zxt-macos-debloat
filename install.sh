@@ -1,172 +1,147 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 REPO="https://raw.githubusercontent.com/zvzt/zxt-macos-debloat/main"
+
 INSTALL="$HOME/.zxt-macos-debloat"
-UID_NUM="$(id -u)"
+PRESETS="$INSTALL/presets"
+STATE="$INSTALL/state"
 
-mkdir -p "$INSTALL/presets"
+TMP="$(mktemp -d)"
 
-curl -fsSL "$REPO/zxt" -o "$INSTALL/zxt"
-curl -fsSL "$REPO/presets/zxt-default.txt" -o "$INSTALL/presets/zxt-default.txt"
+cleanup() {
+    rm -rf "$TMP"
+}
+
+trap cleanup EXIT
+
+echo
+echo "ZXT macOS Debloat"
+echo "=================="
+echo
+
+mkdir -p "$INSTALL"
+mkdir -p "$PRESETS"
+mkdir -p "$STATE"
+
+echo "Downloading latest ZXT..."
+
+curl -fsSL \
+    "$REPO/zxt?$(date +%s)" \
+    -o "$TMP/zxt"
+
+curl -fsSL \
+    "$REPO/presets/zxt-default.txt?$(date +%s)" \
+    -o "$TMP/zxt-default.txt"
+
+chmod +x "$TMP/zxt"
+
+
+# ============================================================
+# Preserve the previously installed preset for migration.
+#
+# This lets the new ZXT re-enable services that an older
+# version disabled but the new preset no longer targets.
+# ============================================================
+
+if [ -f "$PRESETS/zxt-default.txt" ]; then
+    cp \
+        "$PRESETS/zxt-default.txt" \
+        "$STATE/previous-preset.txt"
+
+    echo "Previous preset saved for migration."
+fi
+
+
+# ============================================================
+# Install new version
+# ============================================================
+
+cp "$TMP/zxt" "$INSTALL/zxt"
+
+cp \
+    "$TMP/zxt-default.txt" \
+    "$PRESETS/zxt-default.txt"
 
 chmod +x "$INSTALL/zxt"
 
-"$INSTALL/zxt" apply
 
-echo
-printf "Enable automatic debloat after every login/startup? [y/N]: " >/dev/tty
-IFS= read -r ANSWER < /dev/tty
+# ============================================================
+# Remove legacy automatic startup system
+#
+# launchctl disable overrides already persist across restart.
+# Re-running the entire preset at every boot/login is therefore
+# unnecessary.
+# ============================================================
 
-case "$ANSWER" in
-    y|Y|yes|YES|Yes)
-
-        mkdir -p "$HOME/Library/LaunchAgents"
-
-        cat > "$INSTALL/auto-user.sh" <<'AUTOUSER'
-#!/bin/bash
-
-PRESET="$HOME/.zxt-macos-debloat/presets/zxt-default.txt"
 UID_NUM="$(id -u)"
 
-while IFS= read -r line; do
-    label="${line%%#*}"
-    label="$(echo "$label" | xargs)"
+USER_PLIST="$HOME/Library/LaunchAgents/com.zxt.macos-debloat.plist"
 
-    [ -z "$label" ] && continue
+if [ -f "$USER_PLIST" ]; then
+    launchctl bootout \
+        "gui/$UID_NUM/com.zxt.macos-debloat" \
+        >/dev/null 2>&1 || true
 
-    found=0
+    rm -f "$USER_PLIST"
 
-    for dir in \
-        /System/Library/LaunchAgents \
-        /Library/LaunchAgents \
-        /Library/Apple/System/Library/LaunchAgents \
-        /System/Cryptexes/App/System/Library/LaunchAgents
-    do
-        if [ -e "$dir/$label.plist" ]; then
-            found=1
-            break
-        fi
-    done
+    echo "Removed legacy ZXT login agent."
+fi
 
-    if [ "$found" -eq 1 ]; then
-        launchctl disable "gui/$UID_NUM/$label" >/dev/null 2>&1 || true
-    fi
-done < "$PRESET"
-AUTOUSER
 
-        chmod +x "$INSTALL/auto-user.sh"
+SYSTEM_PLIST="/Library/LaunchDaemons/com.zxt.macos-debloat.system.plist"
 
-        cat > "$HOME/Library/LaunchAgents/com.zxt.macos-debloat.plist" <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.zxt.macos-debloat</string>
+if [ -f "$SYSTEM_PLIST" ]; then
+    sudo launchctl bootout \
+        system/com.zxt.macos-debloat.system \
+        >/dev/null 2>&1 || true
 
-    <key>ProgramArguments</key>
-    <array>
-        <string>$INSTALL/auto-user.sh</string>
-    </array>
+    sudo rm -f "$SYSTEM_PLIST"
 
-    <key>RunAtLoad</key>
-    <true/>
-</dict>
-</plist>
-EOF
+    echo "Removed legacy ZXT startup daemon."
+fi
 
-        launchctl bootout \
-            "gui/$UID_NUM/com.zxt.macos-debloat" \
-            >/dev/null 2>&1 || true
 
-        launchctl bootstrap \
-            "gui/$UID_NUM" \
-            "$HOME/Library/LaunchAgents/com.zxt.macos-debloat.plist"
+LEGACY_SYSTEM_DIR="/Library/Application Support/ZXTMacOSDebloat"
 
-        sudo mkdir -p "/Library/Application Support/ZXTMacOSDebloat"
+if [ -d "$LEGACY_SYSTEM_DIR" ]; then
+    sudo rm -rf "$LEGACY_SYSTEM_DIR"
 
-        sudo cp "$INSTALL/presets/zxt-default.txt" \
-            "/Library/Application Support/ZXTMacOSDebloat/zxt-default.txt"
+    echo "Removed legacy ZXT startup files."
+fi
 
-        sudo tee "/Library/Application Support/ZXTMacOSDebloat/auto-system.sh" >/dev/null <<'AUTOSYSTEM'
-#!/bin/bash
 
-PRESET="/Library/Application Support/ZXTMacOSDebloat/zxt-default.txt"
+if [ -f "$INSTALL/auto-user.sh" ]; then
+    rm -f "$INSTALL/auto-user.sh"
+fi
 
-while IFS= read -r line; do
-    label="${line%%#*}"
-    label="$(echo "$label" | xargs)"
 
-    [ -z "$label" ] && continue
+# ============================================================
+# Apply
+# ============================================================
 
-    found=0
+echo
+echo "Applying updated ZXT preset..."
+echo
 
-    for dir in \
-        /System/Library/LaunchDaemons \
-        /Library/LaunchDaemons \
-        /Library/Apple/System/Library/LaunchDaemons \
-        /System/Cryptexes/App/System/Library/LaunchDaemons
-    do
-        if [ -e "$dir/$label.plist" ]; then
-            found=1
-            break
-        fi
-    done
+"$INSTALL/zxt" apply
 
-    if [ "$found" -eq 1 ]; then
-        launchctl disable "system/$label" >/dev/null 2>&1 || true
-    fi
-done < "$PRESET"
 
-mdutil -a -i off >/dev/null 2>&1 || true
-AUTOSYSTEM
-
-        sudo chmod +x \
-            "/Library/Application Support/ZXTMacOSDebloat/auto-system.sh"
-
-        sudo tee /Library/LaunchDaemons/com.zxt.macos-debloat.system.plist >/dev/null <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-"http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.zxt.macos-debloat.system</string>
-
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Library/Application Support/ZXTMacOSDebloat/auto-system.sh</string>
-    </array>
-
-    <key>RunAtLoad</key>
-    <true/>
-</dict>
-</plist>
-PLIST
-
-        sudo chown root:wheel \
-            /Library/LaunchDaemons/com.zxt.macos-debloat.system.plist
-
-        sudo chmod 644 \
-            /Library/LaunchDaemons/com.zxt.macos-debloat.system.plist
-
-        sudo launchctl bootout \
-            system/com.zxt.macos-debloat.system \
-            >/dev/null 2>&1 || true
-
-        sudo launchctl bootstrap \
-            system \
-            /Library/LaunchDaemons/com.zxt.macos-debloat.system.plist
-
-        echo
-        echo "Automatic startup debloat: ENABLED"
-        ;;
-
-    *)
-        echo
-        echo "Automatic startup debloat: DISABLED"
-        ;;
-esac
+echo
+echo "========================================"
+echo "ZXT installation/update complete."
+echo "========================================"
+echo
+echo "Installed at:"
+echo "$INSTALL"
+echo
+echo "Commands:"
+echo
+echo "  $INSTALL/zxt apply"
+echo "  $INSTALL/zxt status"
+echo "  $INSTALL/zxt list"
+echo "  $INSTALL/zxt restore"
+echo
+echo "A macOS restart is recommended."
+echo
