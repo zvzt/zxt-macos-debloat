@@ -1,7 +1,10 @@
-
 # ZXT macOS Debloat
 
-A performance-focused macOS debloater designed to disable optional Apple background services without indiscriminately disabling core macOS frameworks.
+Aggressive macOS background-service optimization without disabling the core schedulers, graphics stack, Spotlight infrastructure, security infrastructure, or system coordination daemons.
+
+Designed primarily for modern Apple Silicon Macs.
+
+---
 
 ## Install / Update
 
