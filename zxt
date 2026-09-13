@@ -6,20 +6,25 @@ import subprocess
 from pathlib import Path
 
 UID = os.getuid()
+
 BASE_DIR = Path(__file__).resolve().parent
 PRESET = BASE_DIR / "presets" / "zxt-default.txt"
+
+STATE_DIR = BASE_DIR / "state"
+STATE_FILE = STATE_DIR / "disabled-services.txt"
+PREVIOUS_PRESET = STATE_DIR / "previous-preset.txt"
 
 BANNER = r"""
 MacOS debloated by ZXT
 
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠄
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠁⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⢤⡄⠂⢺⠃⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⡪⠊⠙⢷⣤⡆⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⡪⠊⠀⠀⠀⢈⠝⠁⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⣾⣯⣦⡀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⡠⡮⠋⠀⠙⢿⣷⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⣀⣠⡾⠊⠀⠀⢀⢔⠕⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⢤⡄⠂⢺⠃⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⡪⠊⠙⢷⣤⡆⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⡪⠊⠀⠀⠀⢈⠝⠁⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⣾⣯⣦⡀⠀⢀⠔⠁⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⡠⡮⠋⠀⠙⢿⣷⠔⠁⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⣀⣠⡾⠊⠀⠀⢀⢔⠕⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⢷⣸⣊⠀⠀⠀⢰⠕⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⡀⣀⠜⠓⣝⠵⣂⣔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠨⠓⣅⠔⡄⠉⠙⠂⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -40,18 +45,26 @@ DAEMON_DIRS = [
     Path("/System/Cryptexes/App/System/Library/LaunchDaemons"),
 ]
 
-def run(cmd):
+
+def run(cmd, visible=False):
+    if visible:
+        return subprocess.run(cmd, check=False)
+
     return subprocess.run(
         cmd,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        check=False
+        check=False,
     )
 
-def get_labels():
+
+def read_labels(path):
+    if not path.exists():
+        return []
+
     labels = []
 
-    for raw in PRESET.read_text(errors="ignore").splitlines():
+    for raw in path.read_text(errors="ignore").splitlines():
         line = raw.strip()
 
         if not line or line.startswith("#"):
@@ -64,6 +77,11 @@ def get_labels():
 
     return list(dict.fromkeys(labels))
 
+
+def get_labels():
+    return read_labels(PRESET)
+
+
 def service_type(label):
     for directory in DAEMON_DIRS:
         if (directory / f"{label}.plist").exists():
@@ -73,39 +91,208 @@ def service_type(label):
         if (directory / f"{label}.plist").exists():
             return "user"
 
-    return "user"
+    return None
+
 
 def disable(label):
-    if service_type(label) == "system":
-        run(["sudo", "launchctl", "disable", f"system/{label}"])
-    else:
-        run(["launchctl", "disable", f"gui/{UID}/{label}"])
+    kind = service_type(label)
+
+    if kind == "system":
+        result = run(
+            [
+                "sudo",
+                "launchctl",
+                "disable",
+                f"system/{label}",
+            ]
+        )
+        return result.returncode == 0
+
+    if kind == "user":
+        result = run(
+            [
+                "launchctl",
+                "disable",
+                f"gui/{UID}/{label}",
+            ]
+        )
+        return result.returncode == 0
+
+    return False
+
 
 def enable(label):
-    if service_type(label) == "system":
-        run(["sudo", "launchctl", "enable", f"system/{label}"])
-    else:
-        run(["launchctl", "enable", f"gui/{UID}/{label}"])
+    kind = service_type(label)
+
+    if kind == "system":
+        run(
+            [
+                "sudo",
+                "launchctl",
+                "enable",
+                f"system/{label}",
+            ]
+        )
+        return
+
+    if kind == "user":
+        run(
+            [
+                "launchctl",
+                "enable",
+                f"gui/{UID}/{label}",
+            ]
+        )
+        return
+
+    # Migration fallback.
+    #
+    # An old service may no longer be discoverable from its plist,
+    # so attempt both domains. Invalid-domain attempts are harmless.
+    run(
+        [
+            "launchctl",
+            "enable",
+            f"gui/{UID}/{label}",
+        ]
+    )
+
+    run(
+        [
+            "sudo",
+            "launchctl",
+            "enable",
+            f"system/{label}",
+        ]
+    )
+
+
+def save_state(labels):
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+    text = ""
+
+    if labels:
+        text = "\n".join(sorted(labels)) + "\n"
+
+    STATE_FILE.write_text(text)
+
+
+def previous_labels():
+    if STATE_FILE.exists():
+        return set(read_labels(STATE_FILE))
+
+    if PREVIOUS_PRESET.exists():
+        return set(read_labels(PREVIOUS_PRESET))
+
+    return set()
+
 
 def apply():
-    for label in get_labels():
-        disable(label)
+    if not PRESET.exists():
+        print(f"Preset not found: {PRESET}")
+        sys.exit(1)
 
-    run(["sudo", "mdutil", "-a", "-i", "off"])
+    desired = set(get_labels())
+    previous = previous_labels()
+
+    removed = sorted(previous - desired)
+
+    if removed:
+        print(f"Restoring {len(removed)} services removed from the old preset...")
+
+        for label in removed:
+            enable(label)
+
+    disabled = 0
+    unavailable = []
+
+    print(f"Applying ZXT preset ({len(desired)} services)...")
+
+    for label in sorted(desired):
+        if disable(label):
+            disabled += 1
+        else:
+            unavailable.append(label)
+
+    save_state(desired)
+
+    if PREVIOUS_PRESET.exists():
+        try:
+            PREVIOUS_PRESET.unlink()
+        except OSError:
+            pass
+
     print(BANNER)
+    print(f"Preset entries: {len(desired)}")
+    print(f"Services disabled: {disabled}")
+
+    if removed:
+        print(f"Old services restored: {len(removed)}")
+
+    if unavailable:
+        print(
+            f"Unavailable on this macOS version: {len(unavailable)}"
+        )
+
+    print()
+    print("Spotlight indexing was NOT disabled.")
+    print("No WindowServer, CoreSpotlight, CoreDuet, Biome,")
+    print("GamePolicy, QuickLook, or power-management services")
+    print("are intentionally disabled by this preset.")
+    print()
+    print("Restart macOS to fully apply the changes.")
+
 
 def restore():
-    for label in get_labels():
+    labels = previous_labels()
+
+    if not labels:
+        labels = set(get_labels())
+
+    print(f"Restoring {len(labels)} ZXT-managed services...")
+
+    for label in sorted(labels):
         enable(label)
 
-    run(["sudo", "mdutil", "-a", "-i", "on"])
+    save_state(set())
 
     print(BANNER)
-    print("ZXT services restored.")
+    print("ZXT-managed services restored.")
+    print("Restart macOS to fully apply the changes.")
+
 
 def status():
+    desired = set(get_labels())
+    managed = set(read_labels(STATE_FILE))
+
     print(BANNER)
-    print(f"Preset services: {len(get_labels())}")
+    print(f"Current preset entries: {len(desired)}")
+    print(f"Recorded as ZXT-managed: {len(managed)}")
+
+    if managed == desired:
+        print("State: preset applied")
+    elif not managed:
+        print("State: no current ZXT state recorded")
+    else:
+        print("State: preset differs from recorded state")
+
+
+def list_services():
+    for label in get_labels():
+        kind = service_type(label)
+
+        if kind is None:
+            kind = "not found"
+
+        print(f"{kind:10} {label}")
+
+
+def usage():
+    print(
+        "Usage: zxt [apply|status|restore|list]"
+    )
+
 
 def main():
     if len(sys.argv) == 1:
@@ -116,12 +303,20 @@ def main():
 
     if command in ("apply", "--apply"):
         apply()
+
     elif command in ("restore", "--restore"):
         restore()
+
     elif command in ("status", "--status"):
         status()
+
+    elif command in ("list", "--list"):
+        list_services()
+
     else:
-        print("Usage: zxt [apply|status|restore]")
+        usage()
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
