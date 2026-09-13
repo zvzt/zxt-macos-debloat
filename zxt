@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 UID = os.getuid()
@@ -13,6 +15,20 @@ PRESET = BASE_DIR / "presets" / "zxt-default.txt"
 STATE_DIR = BASE_DIR / "state"
 STATE_FILE = STATE_DIR / "disabled-services.txt"
 PREVIOUS_PRESET = STATE_DIR / "previous-preset.txt"
+
+AGENT_DIRS = (
+    Path("/System/Library/LaunchAgents"),
+    Path("/Library/LaunchAgents"),
+    Path("/Library/Apple/System/Library/LaunchAgents"),
+    Path("/System/Cryptexes/App/System/Library/LaunchAgents"),
+)
+
+DAEMON_DIRS = (
+    Path("/System/Library/LaunchDaemons"),
+    Path("/Library/LaunchDaemons"),
+    Path("/Library/Apple/System/Library/LaunchDaemons"),
+    Path("/System/Cryptexes/App/System/Library/LaunchDaemons"),
+)
 
 BANNER = r"""
 MacOS debloated by ZXT
@@ -31,46 +47,41 @@ MacOS debloated by ZXT
 ⠀⠑⠠⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 """
 
-AGENT_DIRS = [
-    Path("/System/Library/LaunchAgents"),
-    Path("/Library/LaunchAgents"),
-    Path("/Library/Apple/System/Library/LaunchAgents"),
-    Path("/System/Cryptexes/App/System/Library/LaunchAgents"),
-]
 
-DAEMON_DIRS = [
-    Path("/System/Library/LaunchDaemons"),
-    Path("/Library/LaunchDaemons"),
-    Path("/Library/Apple/System/Library/LaunchDaemons"),
-    Path("/System/Cryptexes/App/System/Library/LaunchDaemons"),
-]
+def run(cmd: list[str], quiet: bool = True) -> subprocess.CompletedProcess:
+    kwargs = {
+        "check": False,
+        "text": True,
+    }
+
+    if quiet:
+        kwargs["stdout"] = subprocess.DEVNULL
+        kwargs["stderr"] = subprocess.DEVNULL
+
+    return subprocess.run(cmd, **kwargs)
 
 
-def run(cmd, visible=False):
-    if visible:
-        return subprocess.run(cmd, check=False)
+def privileged(
+    cmd: list[str],
+    quiet: bool = True,
+) -> subprocess.CompletedProcess:
+    if os.geteuid() == 0:
+        return run(cmd, quiet=quiet)
 
-    return subprocess.run(
-        cmd,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        check=False,
+    return run(
+        ["sudo", *cmd],
+        quiet=quiet,
     )
 
 
-def read_labels(path):
+def read_labels(path: Path) -> list[str]:
     if not path.exists():
         return []
 
-    labels = []
+    labels: list[str] = []
 
     for raw in path.read_text(errors="ignore").splitlines():
-        line = raw.strip()
-
-        if not line or line.startswith("#"):
-            continue
-
-        line = line.split("#", 1)[0].strip()
+        line = raw.split("#", 1)[0].strip()
 
         if line:
             labels.append(line)
@@ -78,88 +89,110 @@ def read_labels(path):
     return list(dict.fromkeys(labels))
 
 
-def get_labels():
+def preset_labels() -> list[str]:
     return read_labels(PRESET)
 
 
-def service_type(label):
-    for directory in DAEMON_DIRS:
-        if (directory / f"{label}.plist").exists():
-            return "system"
+def user_domain() -> str:
+    return f"gui/{UID}"
+
+
+def registered(domain: str, label: str) -> bool:
+    result = run(
+        [
+            "launchctl",
+            "print",
+            f"{domain}/{label}",
+        ]
+    )
+
+    return result.returncode == 0
+
+
+def direct_plist_kind(label: str) -> set[str]:
+    kinds: set[str] = set()
 
     for directory in AGENT_DIRS:
         if (directory / f"{label}.plist").exists():
-            return "user"
+            kinds.add("user")
 
-    return None
+    for directory in DAEMON_DIRS:
+        if (directory / f"{label}.plist").exists():
+            kinds.add("system")
 
-
-def disable(label):
-    kind = service_type(label)
-
-    if kind == "system":
-        result = run(
-            [
-                "sudo",
-                "launchctl",
-                "disable",
-                f"system/{label}",
-            ]
-        )
-        return result.returncode == 0
-
-    if kind == "user":
-        result = run(
-            [
-                "launchctl",
-                "disable",
-                f"gui/{UID}/{label}",
-            ]
-        )
-        return result.returncode == 0
-
-    return False
+    return kinds
 
 
-def enable(label):
-    kind = service_type(label)
+def domains_for(label: str) -> set[str]:
+    domains: set[str] = set()
 
-    if kind == "system":
-        run(
-            [
-                "sudo",
-                "launchctl",
-                "enable",
-                f"system/{label}",
-            ]
-        )
-        return
+    if registered(user_domain(), label):
+        domains.add("user")
 
-    if kind == "user":
-        run(
-            [
-                "launchctl",
-                "enable",
-                f"gui/{UID}/{label}",
-            ]
-        )
-        return
+    if registered("system", label):
+        domains.add("system")
 
-    # Migration fallback.
-    #
-    # An old service may no longer be discoverable from its plist,
-    # so attempt both domains. Invalid-domain attempts are harmless.
-    run(
+    if not domains:
+        domains |= direct_plist_kind(label)
+
+    return domains
+
+
+def disable_user(label: str) -> bool:
+    domain = user_domain()
+
+    result = run(
         [
             "launchctl",
-            "enable",
-            f"gui/{UID}/{label}",
+            "disable",
+            f"{domain}/{label}",
         ]
     )
 
     run(
         [
-            "sudo",
+            "launchctl",
+            "bootout",
+            f"{domain}/{label}",
+        ]
+    )
+
+    return result.returncode == 0
+
+
+def disable_system(label: str) -> bool:
+    result = privileged(
+        [
+            "launchctl",
+            "disable",
+            f"system/{label}",
+        ]
+    )
+
+    privileged(
+        [
+            "launchctl",
+            "bootout",
+            f"system/{label}",
+        ]
+    )
+
+    return result.returncode == 0
+
+
+def enable_user(label: str) -> None:
+    run(
+        [
+            "launchctl",
+            "enable",
+            f"{user_domain()}/{label}",
+        ]
+    )
+
+
+def enable_system(label: str) -> None:
+    privileged(
+        [
             "launchctl",
             "enable",
             f"system/{label}",
@@ -167,55 +200,187 @@ def enable(label):
     )
 
 
-def save_state(labels):
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
+def save_state(entries: set[str]) -> None:
+    STATE_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    text = ""
+    text = "\n".join(sorted(entries))
 
-    if labels:
-        text = "\n".join(sorted(labels)) + "\n"
+    if text:
+        text += "\n"
 
     STATE_FILE.write_text(text)
 
 
-def previous_labels():
-    if STATE_FILE.exists():
-        return set(read_labels(STATE_FILE))
+def read_state() -> set[str]:
+    if not STATE_FILE.exists():
+        return set()
 
+    return set(
+        read_labels(STATE_FILE)
+    )
+
+
+def encode_state(kind: str, label: str) -> str:
+    return f"{kind}|{label}"
+
+
+def decode_state(entry: str) -> tuple[str | None, str]:
+    if "|" not in entry:
+        return None, entry
+
+    kind, label = entry.split("|", 1)
+
+    if kind not in {
+        "user",
+        "system",
+    }:
+        return None, entry
+
+    return kind, label
+
+
+def migration_labels() -> set[str]:
     if PREVIOUS_PRESET.exists():
-        return set(read_labels(PREVIOUS_PRESET))
+        return set(
+            read_labels(PREVIOUS_PRESET)
+        )
 
     return set()
 
 
-def apply():
+def restore_entry(entry: str) -> None:
+    kind, label = decode_state(entry)
+
+    if kind == "user":
+        enable_user(label)
+        return
+
+    if kind == "system":
+        enable_system(label)
+        return
+
+    domains = domains_for(label)
+
+    if "user" in domains:
+        enable_user(label)
+
+    if "system" in domains:
+        enable_system(label)
+
+    if not domains:
+        enable_user(label)
+        enable_system(label)
+
+
+def actual_disabled(
+    domain: str,
+    label: str,
+) -> bool:
+    result = subprocess.run(
+        [
+            "launchctl",
+            "print-disabled",
+            domain,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    if result.returncode != 0:
+        return False
+
+    if not result.stdout:
+        return False
+
+    return (
+        f'"{label}" => disabled'
+        in result.stdout
+    )
+
+
+def apply(*, quiet: bool = False) -> None:
     if not PRESET.exists():
-        print(f"Preset not found: {PRESET}")
+        print(
+            f"Preset not found: {PRESET}"
+        )
         sys.exit(1)
 
-    desired = set(get_labels())
-    previous = previous_labels()
+    desired = set(
+        preset_labels()
+    )
 
-    removed = sorted(previous - desired)
+    previous_state = read_state()
+    old_labels = migration_labels()
 
-    if removed:
-        print(f"Restoring {len(removed)} services removed from the old preset...")
+    previous_labels = {
+        decode_state(entry)[1]
+        for entry in previous_state
+    }
 
-        for label in removed:
-            enable(label)
+    removed_labels = (
+        previous_labels | old_labels
+    ) - desired
 
-    disabled = 0
-    unavailable = []
+    if removed_labels and not quiet:
+        print(
+            f"Restoring {len(removed_labels)} "
+            "labels removed from the previous preset..."
+        )
 
-    print(f"Applying ZXT preset ({len(desired)} services)...")
+    for label in sorted(removed_labels):
+        domains = domains_for(label)
+
+        if "user" in domains:
+            enable_user(label)
+
+        if "system" in domains:
+            enable_system(label)
+
+        if not domains:
+            enable_user(label)
+            enable_system(label)
+
+    managed: set[str] = set()
+    unavailable: list[str] = []
+
+    if not quiet:
+        print(
+            f"Applying ZXT preset "
+            f"({len(desired)} labels)..."
+        )
 
     for label in sorted(desired):
-        if disable(label):
-            disabled += 1
-        else:
-            unavailable.append(label)
+        domains = domains_for(label)
 
-    save_state(desired)
+        if not domains:
+            unavailable.append(label)
+            continue
+
+        if "user" in domains:
+            disable_user(label)
+
+            managed.add(
+                encode_state(
+                    "user",
+                    label,
+                )
+            )
+
+        if "system" in domains:
+            disable_system(label)
+
+            managed.add(
+                encode_state(
+                    "system",
+                    label,
+                )
+            )
+
+    save_state(managed)
 
     if PREVIOUS_PRESET.exists():
         try:
@@ -223,95 +388,239 @@ def apply():
         except OSError:
             pass
 
-    print(BANNER)
-    print(f"Preset entries: {len(desired)}")
-    print(f"Services disabled: {disabled}")
+    if quiet:
+        return
 
-    if removed:
-        print(f"Old services restored: {len(removed)}")
+    print(BANNER)
+
+    print(
+        f"Preset labels: {len(desired)}"
+    )
+
+    print(
+        f"Managed launchd targets: "
+        f"{len(managed)}"
+    )
+
+    if removed_labels:
+        print(
+            f"Old labels restored: "
+            f"{len(removed_labels)}"
+        )
 
     if unavailable:
         print(
-            f"Unavailable on this macOS version: {len(unavailable)}"
+            f"Not present on this macOS build: "
+            f"{len(unavailable)}"
         )
 
     print()
-    print("Spotlight indexing was NOT disabled.")
-    print("No WindowServer, CoreSpotlight, CoreDuet, Biome,")
-    print("GamePolicy, QuickLook, or power-management services")
-    print("are intentionally disabled by this preset.")
+    print(
+        "Spotlight indexing was left "
+        "exactly as it was."
+    )
+    print(
+        "Core schedulers, WindowServer, "
+        "CoreSpotlight, CoreDuet,"
+    )
+    print(
+        "Biome, GamePolicy, TCC, "
+        "runningboardd and dasd are retained."
+    )
     print()
-    print("Restart macOS to fully apply the changes.")
+    print(
+        "Restart macOS once after "
+        "the first install/update."
+    )
 
 
-def restore():
-    labels = previous_labels()
+def reapply(kind: str) -> None:
+    desired = preset_labels()
 
-    if not labels:
-        labels = set(get_labels())
+    for label in desired:
+        domains = domains_for(label)
 
-    print(f"Restoring {len(labels)} ZXT-managed services...")
+        if kind not in domains:
+            continue
 
-    for label in sorted(labels):
-        enable(label)
+        if kind == "user":
+            disable_user(label)
+
+        else:
+            disable_system(label)
+
+
+def restore() -> None:
+    state = read_state()
+
+    if not state:
+        print(
+            "No ZXT-managed state is recorded."
+        )
+        return
+
+    print(
+        f"Restoring {len(state)} "
+        "ZXT-managed launchd targets..."
+    )
+
+    for entry in sorted(state):
+        restore_entry(entry)
 
     save_state(set())
 
     print(BANNER)
-    print("ZXT-managed services restored.")
-    print("Restart macOS to fully apply the changes.")
 
-
-def status():
-    desired = set(get_labels())
-    managed = set(read_labels(STATE_FILE))
-
-    print(BANNER)
-    print(f"Current preset entries: {len(desired)}")
-    print(f"Recorded as ZXT-managed: {len(managed)}")
-
-    if managed == desired:
-        print("State: preset applied")
-    elif not managed:
-        print("State: no current ZXT state recorded")
-    else:
-        print("State: preset differs from recorded state")
-
-
-def list_services():
-    for label in get_labels():
-        kind = service_type(label)
-
-        if kind is None:
-            kind = "not found"
-
-        print(f"{kind:10} {label}")
-
-
-def usage():
     print(
-        "Usage: zxt [apply|status|restore|list]"
+        "ZXT-managed launchd overrides "
+        "were re-enabled."
+    )
+
+    print(
+        "Spotlight indexing was not changed."
+    )
+
+    print(
+        "Restart macOS to allow services "
+        "to return normally."
     )
 
 
-def main():
+def status() -> None:
+    desired = preset_labels()
+
+    user_disabled = 0
+    system_disabled = 0
+    present = 0
+
+    for label in desired:
+        domains = domains_for(label)
+
+        if domains:
+            present += 1
+
+        if (
+            "user" in domains
+            and actual_disabled(
+                user_domain(),
+                label,
+            )
+        ):
+            user_disabled += 1
+
+        if (
+            "system" in domains
+            and actual_disabled(
+                "system",
+                label,
+            )
+        ):
+            system_disabled += 1
+
+    print(BANNER)
+
+    print(
+        f"Preset labels: {len(desired)}"
+    )
+
+    print(
+        f"Present on this Mac: {present}"
+    )
+
+    print(
+        f"User-domain disabled: "
+        f"{user_disabled}"
+    )
+
+    print(
+        f"System-domain disabled: "
+        f"{system_disabled}"
+    )
+
+    print(
+        f"Recorded ZXT targets: "
+        f"{len(read_state())}"
+    )
+
+    print()
+    print("Spotlight status:")
+
+    subprocess.run(
+        [
+            "mdutil",
+            "-as",
+        ],
+        check=False,
+    )
+
+
+def list_services() -> None:
+    for label in preset_labels():
+        domains = domains_for(label)
+
+        if domains:
+            where = ",".join(
+                sorted(domains)
+            )
+        else:
+            where = "not-present"
+
+        print(
+            f"{where:12} {label}"
+        )
+
+
+def usage() -> None:
+    print(
+        "Usage: zxt "
+        "[apply|status|restore|list|"
+        "reapply-user|reapply-system]"
+    )
+
+
+def main() -> None:
     if len(sys.argv) == 1:
         apply()
         return
 
     command = sys.argv[1].lower()
 
-    if command in ("apply", "--apply"):
-        apply()
+    quiet = (
+        "--quiet"
+        in sys.argv[2:]
+    )
 
-    elif command in ("restore", "--restore"):
+    if command in {
+        "apply",
+        "--apply",
+    }:
+        apply(
+            quiet=quiet
+        )
+
+    elif command in {
+        "restore",
+        "--restore",
+    }:
         restore()
 
-    elif command in ("status", "--status"):
+    elif command in {
+        "status",
+        "--status",
+    }:
         status()
 
-    elif command in ("list", "--list"):
+    elif command in {
+        "list",
+        "--list",
+    }:
         list_services()
+
+    elif command == "reapply-user":
+        reapply("user")
+
+    elif command == "reapply-system":
+        reapply("system")
 
     else:
         usage()
