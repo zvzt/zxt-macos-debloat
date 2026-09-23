@@ -1,0 +1,124 @@
+# ZXT Aggressive Profile - additions on top of Balanced
+# This profile disables more optional Apple features and background helpers.
+# Siri, Spotlight, and Apple Intelligence are still controlled separately.
+
+# Proactive suggestions / prediction
+com.apple.suggestd
+com.apple.proactived
+com.apple.proactiveeventtrackerd
+com.apple.ospredictiond
+
+# News / sports
+com.apple.newsd
+com.apple.sportsd
+
+# Photos background intelligence (Photos library core remains)
+com.apple.photoanalysisd
+com.apple.mediaanalysisd
+com.apple.peopled
+
+# HomeKit / Matter
+com.apple.homed
+com.apple.homeeventsd
+com.apple.threadradiod
+com.apple.ThreadCommissionerService
+com.apple.homeenergyd
+
+# Screen Time
+com.apple.ScreenTimeAgent
+com.apple.UsageTrackingAgent
+
+# Family / parental controls
+com.apple.familycircled
+com.apple.familycontrols
+com.apple.familycontrols.useragent
+com.apple.FamilyControlsAgent
+com.apple.familynotificationd
+com.apple.parentalcontrols.check
+com.apple.askpermissiond
+
+# Education / classroom
+com.apple.studentd
+com.apple.assessmentagent
+com.apple.progressd
+
+# Apple Books
+com.apple.bookassetd
+com.apple.bookdatastored
+
+# Maps background extras
+com.apple.Maps.mapssyncd
+com.apple.Maps.mapspushd
+com.apple.maps.destinationd
+
+# Feedback / beta helpers
+com.apple.appleseed.fbahelperd
+com.apple.betaenrollmentagent
+com.apple.betaenrollmentd
+com.apple.feedbackd
+
+# Game Center
+com.apple.gamed
+com.apple.gamesaved
+com.apple.sociallayerd
+
+# Game controller discovery
+com.apple.GameController.gamecontrolleragentd
+com.apple.GameController.gamecontrollerd
+
+# Sidecar
+com.apple.sidecar-display-agent
+com.apple.sidecar-relay
+
+# Memoji / stickers
+com.apple.avatarsd
+com.apple.stickersd
+
+# Shazam
+com.apple.shazamd
+
+# Live Activities
+com.apple.liveactivitiesd
+
+# Voice Memos / personal voice
+com.apple.voicememod
+com.apple.voicebankingd
+
+# Dictation helper
+com.apple.DictationIM
+
+# Translate
+com.apple.translationd
+
+# Apple TV background extras
+com.apple.watchlistd
+com.apple.videosubscriptionsd
+
+# Exchange Notes helper
+com.apple.notes.exchangenotesd
+
+# Contacts Siri donation
+com.apple.contacts.donation-agent
+
+# Location prediction (CoreLocation and Find My remain)
+com.apple.navd
+com.apple.routined
+
+# Charging sound
+com.apple.powerchime
+
+# Printer UI (do not use aggressive if you print from this Mac)
+com.apple.printtool.agent
+com.apple.printtool.daemon
+com.apple.printuitool.agent
+
+# Touch Bar helpers (not useful on Macs without a Touch Bar)
+com.apple.nowplayingtouchui
+com.apple.touchbarserver
+com.apple.controlstrip
+com.apple.SpacesTouchBarAgent.app
+com.apple.accessibility.dfrhud
+
+# MDM / managed app distribution (not for managed/work Macs)
+com.apple.managedappdistributionagent
+com.apple.managedappdistributiond
