@@ -1,0 +1,22 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python syntax
+        run: python3 -m py_compile zxt
+      - name: Check shell syntax
+        run: |
+          bash -n install.sh
+          bash -n uninstall.sh
+      - name: Check CLI basics
+        run: |
+          chmod +x zxt
+          ./zxt version
+          ./zxt help
