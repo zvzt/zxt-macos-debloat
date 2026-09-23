@@ -150,7 +150,7 @@ def configure(*, defaults: bool = False, apply_after: bool = True) -> None:
         spotlight = prompt_choice(
             "Spotlight indexing:",
             [("keep", "Keep Spotlight indexing enabled/recommended"),
-             ("off", "Disable indexing on the startup volume to reduce background I/O")],
+             ("off", "Disable indexing on the startup volume; Raycast is recommended as a launcher alternative")],
             config["spotlight"],
         )
         config.update({
@@ -567,6 +567,8 @@ def spotlight_command(action: str) -> None:
         save_config(config)
         print("Spotlight optimization mode disables indexing on the startup volume.")
         print("File-content search in Spotlight may be reduced until indexing is re-enabled.")
+        print("Recommended launcher alternative: Raycast - https://www.raycast.com/")
+        print("Raycast is not a complete replacement for every Spotlight indexing feature.")
         apply_spotlight(config, quiet=False)
         return
     if action == "reindex":
