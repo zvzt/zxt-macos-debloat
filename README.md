@@ -41,6 +41,16 @@ The installer asks four things:
 
 ZXT does **not** disable Spotlight's core launchd infrastructure. Spotlight indexing is controlled separately and can be restored at any time.
 
+### Recommended Spotlight alternative: Raycast
+
+If you prefer a more powerful launcher-style workflow, ZXT recommends [Raycast](https://www.raycast.com/) as an alternative to using Spotlight for everyday launching and quick actions.
+
+Raycast provides a keyboard-first launcher with app launching, file search, Quicklinks, extensions, script commands, window management, snippets, and other productivity tools.
+
+If you choose `zxt spotlight off`, Raycast can still be useful as your main launcher, but it should not be treated as a complete replacement for every Spotlight indexing/search feature. Some macOS file-search behavior can still depend on system indexing.
+
+Official site: [raycast.com](https://www.raycast.com/)
+
 Apple documents Spotlight privacy/indexing behavior here: [Apple Support — Spotlight search privacy](https://support.apple.com/guide/mac-help/mchl1bb43b84/mac).
 
 ## Common commands
