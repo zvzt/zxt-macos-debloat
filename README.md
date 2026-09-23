@@ -11,7 +11,7 @@ ZXT now defaults to a **Balanced** profile and lets you choose whether to keep o
 Run this in Terminal:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/zvzt/zxt-macos-debloat/main/install.sh)
+bash <(curl -fsSL https://zxt.lol/debloat/install.sh)
 ```
 
 The first install opens a setup wizard. Existing installs keep their saved configuration when updated.
@@ -173,7 +173,7 @@ Restart macOS afterward so restored services can return normally.
 Run:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/zvzt/zxt-macos-debloat/main/uninstall.sh)
+bash <(curl -fsSL https://zxt.lol/debloat/uninstall.sh)
 ```
 
 The uninstaller first calls `zxt restore`, removes only ZXT's own LaunchAgents/LaunchDaemon and command symlink, then removes `~/.zxt-macos-debloat`.
