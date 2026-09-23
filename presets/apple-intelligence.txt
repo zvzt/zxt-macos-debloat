@@ -1,0 +1,10 @@
+# Optional Apple Intelligence module
+# Generic ML infrastructure is intentionally not targeted.
+com.apple.generativeexperiencesd
+com.apple.privatecloudcomputed
+com.apple.modelcatalogd
+com.apple.ModelCatalogAgent
+com.apple.modelmanagerd
+com.apple.intelligenceflowd
+com.apple.intelligencetasksd
+com.apple.callintelligenced
