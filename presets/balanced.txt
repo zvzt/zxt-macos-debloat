@@ -1,0 +1,28 @@
+# ZXT Balanced Profile
+# Lower-risk background cleanup intended for most personal Macs.
+# User-facing features such as Siri, Spotlight, HomeKit, printing,
+# Sidecar, controllers, Screen Time, and Apple Intelligence are kept.
+
+# Analytics / telemetry
+com.apple.analyticsd
+com.apple.analyticsagent
+com.apple.SubmitDiagInfo
+com.apple.geoanalyticsd
+com.apple.inputanalyticsd
+com.apple.ecosystemanalyticsd
+com.apple.audioanalyticsd
+com.apple.usbctelemetryd
+com.apple.wifianalyticsd
+com.apple.systemstats.analysis
+com.apple.systemstats.daily
+com.apple.signpost.signpost_reporter
+com.apple.loginwindow.LWWeeklyMessageTracer
+
+# Tips / promotional content
+com.apple.tipsd
+com.apple.ap.promotedcontentd
+
+# Experiments / beta usage helpers
+com.apple.triald
+com.apple.appleseed.seedusaged
+com.apple.appleseed.seedusaged.postinstall
