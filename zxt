@@ -102,8 +102,7 @@ def load_config() -> dict[str, str]:
 
 def save_config(config: dict[str, str]) -> None:
     BASE_DIR.mkdir(parents=True, exist_ok=True)
-    CONFIG_FILE.write_text(json.dumps(config, indent=2, sort_keys=True) + "
-")
+    CONFIG_FILE.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
 
 
 def prompt_choice(title: str, choices: list[tuple[str, str]], default: str) -> str:
@@ -272,10 +271,8 @@ def read_state() -> set[str]:
 
 def save_state(entries: set[str]) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
-    text = "
-".join(sorted(entries))
-    STATE_FILE.write_text(text + ("
-" if text else ""))
+    text = "\n".join(sorted(entries))
+    STATE_FILE.write_text(text + ("\n" if text else ""))
 
 
 def restore_entry(entry: str) -> None:
@@ -315,8 +312,7 @@ def apply_spotlight(config: dict[str, str], *, quiet: bool = False) -> None:
         if enabled is True:
             result = privileged(["mdutil", "-i", "off", "/"], quiet=quiet)
             if result.returncode == 0:
-                SPOTLIGHT_STATE_FILE.write_text("changed-from-enabled
-")
+                SPOTLIGHT_STATE_FILE.write_text("changed-from-enabled\n")
                 if not quiet:
                     print("Spotlight indexing disabled on the startup volume.")
         elif enabled is False and not quiet:
@@ -480,9 +476,7 @@ def status() -> None:
     print(f"Recorded ZXT targets:    {len(read_state())}")
     print()
     print("Spotlight:")
-    print("  " + spotlight_status_text().replace("
-", "
-  "))
+    print("  " + spotlight_status_text().replace("\n", "\n  "))
 
 
 def list_services() -> None:
@@ -533,9 +527,7 @@ def doctor() -> None:
     print_config()
     print()
     print("Spotlight:")
-    print("  " + spotlight_status_text().replace("
-", "
-  "))
+    print("  " + spotlight_status_text().replace("\n", "\n  "))
 
 
 def set_feature(feature: str, value: str) -> None:
