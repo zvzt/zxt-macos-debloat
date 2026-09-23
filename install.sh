@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-REPO="https://raw.githubusercontent.com/zvzt/zxt-macos-debloat/main"
+REPO="https://zxt.lol/debloat"
 INSTALL="$HOME/.zxt-macos-debloat"
 PRESETS="$INSTALL/presets"
 STATE="$INSTALL/state"
@@ -14,11 +14,7 @@ UID_NUM="$(id -u)"
 cleanup() { rm -rf "$TMP"; }
 trap cleanup EXIT
 
-printf '
-ZXT macOS Debloat
-==================
-
-'
+printf '\nZXT macOS Debloat\n==================\n\n'
 
 if [ "$(uname -s)" != "Darwin" ]; then
     echo "ZXT only supports macOS."
@@ -72,8 +68,7 @@ else
 fi
 
 echo
-printf 'Administrator access may be requested for system launchd targets.
-'
+printf 'Administrator access may be requested for system launchd targets.\n'
 sudo -v
 
 "$INSTALL/zxt" apply
@@ -127,40 +122,19 @@ sudo chown root:wheel "$SYSTEM_DAEMON"
 sudo chmod 644 "$SYSTEM_DAEMON"
 sudo launchctl bootstrap system "$SYSTEM_DAEMON" >/dev/null 2>&1 || true
 
-printf '
-========================================
-'
-printf 'ZXT installation/update complete.
-'
-printf '========================================
-
-'
-printf 'Common commands:
-'
-printf '  zxt status                 Show current state
-'
-printf '  zxt configure              Change profile/Siri/AI/Spotlight choices
-'
-printf '  zxt apply --dry-run        Preview changes without applying them
-'
-printf '  zxt apply                  Apply the saved configuration
-'
-printf '  zxt doctor                 Check installation and macOS support
-'
-printf '  zxt restore                Restore changes made by ZXT
-'
-printf '
-Feature shortcuts:
-'
-printf '  zxt siri keep|disable
-'
-printf '  zxt intelligence keep|disable
-'
-printf '  zxt spotlight status|keep|off|on|reindex
-'
-printf '
-Run zxt help for the full command list.
-'
-printf 'Restart macOS once after first install or a major profile change.
-
-'
+printf '\n========================================\n'
+printf 'ZXT installation/update complete.\n'
+printf '========================================\n\n'
+printf 'Common commands:\n'
+printf '  zxt status                 Show current state\n'
+printf '  zxt configure              Change profile/Siri/AI/Spotlight choices\n'
+printf '  zxt apply --dry-run        Preview changes without applying them\n'
+printf '  zxt apply                  Apply the saved configuration\n'
+printf '  zxt doctor                 Check installation and macOS support\n'
+printf '  zxt restore                Restore changes made by ZXT\n'
+printf '\nFeature shortcuts:\n'
+printf '  zxt siri keep|disable\n'
+printf '  zxt intelligence keep|disable\n'
+printf '  zxt spotlight status|keep|off|on|reindex\n'
+printf '\nRun zxt help for the full command list.\n'
+printf 'Restart macOS once after first install or a major profile change.\n\n'
