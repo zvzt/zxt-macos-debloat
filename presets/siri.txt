@@ -1,0 +1,11 @@
+# Optional Siri module
+# Used only when config sets Siri to "disable".
+com.apple.assistantd
+com.apple.Siri.agent
+com.apple.SiriTTSTrainingAgent
+com.apple.sirittsd
+com.apple.siriinferenced
+com.apple.siriknowledged
+com.apple.assistant_cdmd
+com.apple.siriactionsd
+com.apple.parsec-fbf
