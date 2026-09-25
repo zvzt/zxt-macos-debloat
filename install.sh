@@ -99,28 +99,10 @@ EOF
 
 launchctl bootstrap "gui/$UID_NUM" "$USER_AGENT" >/dev/null 2>&1 || true
 
-sudo tee "$SYSTEM_DAEMON" >/dev/null <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.zxt.macos-debloat.system</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>$INSTALL/zxt</string>
-        <string>reapply-system</string>
-        <string>--quiet</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-</dict>
-</plist>
-EOF
-
-sudo chown root:wheel "$SYSTEM_DAEMON"
-sudo chmod 644 "$SYSTEM_DAEMON"
-sudo launchctl bootstrap system "$SYSTEM_DAEMON" >/dev/null 2>&1 || true
+# launchctl disable overrides persist across reboot, so a root LaunchDaemon is not
+# required. Remove the legacy helper if an older ZXT version installed it.
+sudo launchctl bootout system/com.zxt.macos-debloat.system >/dev/null 2>&1 || true
+sudo rm -f "$SYSTEM_DAEMON"
 
 printf '\n========================================\n'
 printf 'ZXT installation/update complete.\n'
@@ -137,4 +119,5 @@ printf '  zxt siri keep|disable\n'
 printf '  zxt intelligence keep|disable\n'
 printf '  zxt spotlight status|keep|off|on|reindex\n'
 printf '\nRun zxt help for the full command list.\n'
+printf 'System launchd disable overrides persist without a root background helper.\n'
 printf 'Restart macOS once after first install or a major profile change.\n\n'
