@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+- Fixed parsing of `launchctl print-disabled` so disabled services are reported correctly.
+- Removed the root LaunchDaemon used by older versions for system reapply.
+- Installer now removes the legacy system helper during updates.
+- Added behavior and security regression tests.
+- Expanded CI to run a real dry-run on macOS.
+
 ## 2.0.0
 
 - Added Balanced and Aggressive profiles.
