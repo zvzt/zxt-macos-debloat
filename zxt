@@ -4,12 +4,13 @@ from __future__ import annotations
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 UID = os.getuid()
 BASE_DIR = Path(__file__).resolve().parent
 PRESETS_DIR = BASE_DIR / "presets"
@@ -228,7 +229,8 @@ def actual_disabled(domain: str, label: str) -> bool:
     result = capture(["launchctl", "print-disabled", domain])
     if result.returncode != 0 or not result.stdout:
         return False
-    return f'"{label}" => disabled' in result.stdout
+    pattern = rf'"{re.escape(label)}"\s*=>\s*(?:true|disabled)\b'
+    return re.search(pattern, result.stdout, re.IGNORECASE) is not None
 
 
 def disable_user(label: str) -> bool:
