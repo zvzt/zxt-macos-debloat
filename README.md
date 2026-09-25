@@ -2,7 +2,7 @@
 
 A configurable macOS background-service optimizer focused on reducing optional background work without blindly disabling core macOS infrastructure.
 
-ZXT now defaults to a **Balanced** profile and lets you choose whether to keep or disable **Siri**, **Apple Intelligence**, and **Spotlight indexing**.
+ZXT defaults to a **Balanced** profile and lets you choose whether to keep or disable **Siri**, **Apple Intelligence**, and **Spotlight indexing**.
 
 > Designed primarily for personal Apple Silicon Macs. Service labels vary between macOS releases, so ZXT automatically skips labels that are not present on your system.
 
@@ -43,13 +43,11 @@ ZXT does **not** disable Spotlight's core launchd infrastructure. Spotlight inde
 
 ### Recommended Spotlight alternative: Raycast
 
-If you prefer a more powerful launcher-style workflow, ZXT recommends [Raycast](https://www.raycast.com/) as an alternative to using Spotlight for everyday launching and quick actions.
+If you prefer a launcher-style workflow, ZXT recommends [Raycast](https://www.raycast.com/) as an alternative to using Spotlight for everyday launching and quick actions.
 
-Raycast provides a keyboard-first launcher with app launching, file search, Quicklinks, extensions, script commands, window management, snippets, and other productivity tools.
+Raycast provides app launching, file search, Quicklinks, extensions, script commands, window management, snippets, and other productivity tools.
 
-If you choose `zxt spotlight off`, Raycast can still be useful as your main launcher, but it should not be treated as a complete replacement for every Spotlight indexing/search feature. Some macOS file-search behavior can still depend on system indexing.
-
-Official site: [raycast.com](https://www.raycast.com/)
+If you choose `zxt spotlight off`, Raycast can still be useful as your main launcher, but it is not a complete replacement for every Spotlight indexing/search feature. Some macOS file-search behavior can still depend on system indexing.
 
 Apple documents Spotlight privacy/indexing behavior here: [Apple Support — Spotlight search privacy](https://support.apple.com/guide/mac-help/mchl1bb43b84/mac).
 
@@ -105,7 +103,7 @@ zxt help
 
 ## Change features quickly
 
-Switch between the two profiles:
+Switch profiles:
 
 ```bash
 zxt profile balanced
@@ -149,7 +147,7 @@ zxt spotlight reindex
 - `zxt doctor` checks the installation.
 - `zxt configure` provides a repeatable setup wizard.
 - `zxt` with no arguments now shows status instead of immediately making changes.
-- Restore state only records launchd targets that ZXT actually changed. Services already disabled before ZXT are left owned by the user/system and are not re-enabled by normal restore.
+- Restore state only records launchd targets that ZXT actually changed.
 - Updating preserves your config and state.
 - Startup reapply jobs remain limited to ZXT-selected launchd targets.
 - A dedicated uninstaller restores ZXT-managed changes before removing ZXT.
@@ -162,7 +160,7 @@ The Balanced profile is the recommended choice if you want fewer background proc
 
 The Aggressive profile is for personal Macs where you understand the feature tradeoffs. Do not use the Aggressive profile on a managed/work Mac unless you know which services your organization requires.
 
-Before applying a profile, you can always run:
+Before applying a profile:
 
 ```bash
 zxt apply --dry-run
@@ -179,8 +177,6 @@ zxt restore
 Restart macOS afterward so restored services can return normally.
 
 ## Uninstall
-
-Run:
 
 ```bash
 bash <(curl -fsSL https://zxt.lol/debloat/uninstall.sh)
@@ -211,8 +207,6 @@ ZXT installs the command at:
 ## Troubleshooting
 
 ### `zxt: command not found`
-
-Run:
 
 ```bash
 ls -l /usr/local/bin/zxt
@@ -245,16 +239,24 @@ Enable indexing:
 zxt spotlight on
 ```
 
-If Spotlight itself is behaving incorrectly, rebuild the index:
+If Spotlight itself is behaving incorrectly:
 
 ```bash
 zxt spotlight reindex
 ```
 
-Reindexing can take time and temporarily use more CPU/disk.
+Reindexing can temporarily increase CPU and disk activity.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for security notes and reporting guidance.
 
 ## Credits
 
 This project was inspired by and originally based on work from [OleksandrKrupko/mac-os-debloat](https://github.com/OleksandrKrupko/mac-os-debloat).
 
 Maintained as ZXT macOS Debloat by [zvzt](https://github.com/zvzt).
+
+## License
+
+MIT — see [LICENSE](LICENSE). The original project copyright notice is preserved in the license.
