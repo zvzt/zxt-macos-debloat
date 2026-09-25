@@ -1,6 +1,6 @@
 # Security
 
-ZXT changes launchd override state and can optionally change Spotlight indexing. Review the source and use `zxt apply --dry-run` before applying changes if you want to inspect the selected targets first.
+ZXT changes launchd override state and can optionally change Spotlight indexing. ZXT does not keep a root background helper installed; older ZXT system helpers are removed during update/uninstall. Review the source and use `zxt apply --dry-run` before applying changes if you want to inspect the selected targets first.
 
 ## Reporting a problem
 
