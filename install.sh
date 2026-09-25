@@ -75,6 +75,9 @@ sudo -v
 
 launchctl bootout "gui/$UID_NUM/com.zxt.macos-debloat" >/dev/null 2>&1 || true
 rm -f "$USER_AGENT"
+# Older releases installed a root LaunchDaemon that executed the user-owned
+# ZXT script. Remove it during every install/update; launchctl disable overrides
+# persist without that background helper.
 sudo launchctl bootout system/com.zxt.macos-debloat.system >/dev/null 2>&1 || true
 sudo rm -f "$SYSTEM_DAEMON"
 
@@ -98,11 +101,6 @@ cat > "$USER_AGENT" <<EOF
 EOF
 
 launchctl bootstrap "gui/$UID_NUM" "$USER_AGENT" >/dev/null 2>&1 || true
-
-# launchctl disable overrides persist across reboot, so a root LaunchDaemon is not
-# required. Remove the legacy helper if an older ZXT version installed it.
-sudo launchctl bootout system/com.zxt.macos-debloat.system >/dev/null 2>&1 || true
-sudo rm -f "$SYSTEM_DAEMON"
 
 printf '\n========================================\n'
 printf 'ZXT installation/update complete.\n'
