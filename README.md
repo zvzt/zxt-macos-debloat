@@ -138,6 +138,14 @@ zxt spotlight reindex
 
 ## What changed in v2
 
+### 2.0.1 hardening
+
+- Fixed disabled-service status detection to match current `launchctl print-disabled` output.
+- Removed the legacy root LaunchDaemon. macOS launchd disable overrides persist without a root background helper.
+- Updates automatically remove the old system helper if a previous version installed it.
+- Expanded automated syntax, dry-run, and behavior checks.
+
+
 - Balanced profile is now the default.
 - Aggressive extras are separated from the safer base profile.
 - Siri is optional instead of always being disabled.
@@ -149,12 +157,14 @@ zxt spotlight reindex
 - `zxt` with no arguments now shows status instead of immediately making changes.
 - Restore state only records launchd targets that ZXT actually changed.
 - Updating preserves your config and state.
-- Startup reapply jobs remain limited to ZXT-selected launchd targets.
+- The user-level login reapply job remains limited to ZXT-selected user launchd targets.
 - A dedicated uninstaller restores ZXT-managed changes before removing ZXT.
 
 ## Safety model
 
 ZXT intentionally does **not** target core services such as `launchd`, `WindowServer`, `tccd`, `securityd`, `powerd`, `runningboardd`, `dasd`, `mds`, `mdworker`, or CoreSpotlight infrastructure.
+
+The installer does not keep a root background helper installed. System launchd disable overrides are applied directly and persist through launchd's override state.
 
 The Balanced profile is the recommended choice if you want fewer background processes without intentionally removing major macOS features.
 
@@ -182,7 +192,7 @@ Restart macOS afterward so restored services can return normally.
 bash <(curl -fsSL https://zxt.lol/debloat/uninstall.sh)
 ```
 
-The uninstaller first calls `zxt restore`, removes only ZXT's own LaunchAgents/LaunchDaemon and command symlink, then removes `~/.zxt-macos-debloat`.
+The uninstaller first calls `zxt restore`, removes ZXT's user LaunchAgent, any legacy ZXT system LaunchDaemon, and the command symlink, then removes `~/.zxt-macos-debloat`.
 
 ## Files
 
