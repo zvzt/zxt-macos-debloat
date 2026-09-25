@@ -15,8 +15,11 @@ jobs:
         run: |
           bash -n install.sh
           bash -n uninstall.sh
+      - name: Run unit checks
+        run: python3 tests/test_zxt.py -v
       - name: Check CLI basics
         run: |
           chmod +x zxt
           ./zxt version
           ./zxt help
+          ./zxt apply --dry-run
